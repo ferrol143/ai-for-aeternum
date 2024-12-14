@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI - Autofill - Python</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div>
+        <div>
+            <input type="file" name="upload-document" id="upload-document">
+        </div>
+        <p id="result"></p>
+        <button id="btn-upload" style="margin-top: 30px; padding: 10px;">Upload Certificate</button>
+    </div>
+</body>
+</html>
+
+<script async>
+    const data = new FormData();
+
+    document.getElementById('btn-upload').addEventListener('click', async () => {
+        const input = document.getElementById('upload-document');
+        data.append("file", input.files[0]);
+        try {
+            const response = await axios.post('http://localhost:3000/upload-single', data);
+            const resultRes = response.data;
+
+            // Clear previous result content
+            const resultContainer = document.getElementById('result');
+            resultContainer.innerHTML = '';
+
+            // Assuming resultRes.result contains labels and values as in your example
+            const { labels, values } = resultRes.result;
+
+            // Dynamically create and display key-value pairs
+            for (const key in labels) {
+                if (labels.hasOwnProperty(key)) {
+                    const label = labels[key];
+                    const value = values[key] !== null ? values[key] : 'N/A'; // Fallback for null values
+
+                    // Create HTML elements to display label and value in read-only input
+                    const row = document.createElement('div');
+                    row.classList.add('result-row'); // Add a class for styling if needed
+
+                    // Create label
+                    const labelElement = document.createElement('label');
+                    labelElement.innerHTML = `<strong>${label}:</strong>`;
+
+                    // Create input field
+                    const inputElement = document.createElement('input');
+                    inputElement.type = 'text';
+                    inputElement.value = value;
+                    inputElement.classList.add('result-input'); // Add a class for styling if needed
+
+                    // Append label and input to the row
+                    row.appendChild(labelElement);
+                    row.appendChild(inputElement);
+
+                    // Append the row to the result container
+                    resultContainer.appendChild(row);
+                }
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error);
+        }
+    });
+</script>
